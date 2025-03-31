@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import { useEffect } from "react";
 import AboutUs from "./pages/Aboutus";
 import ContactUs from "./pages/Contactus";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Wrapper component to conditionally show header/footer
 const Layout = ({ children }) => {
@@ -61,6 +62,7 @@ function App() {
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contact" element={<ContactUs />} />
+          <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         
         </Routes>
