@@ -61,7 +61,7 @@ function App() {
           <Route path="/parking-lots" element={<ParkingLots />} />
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/aboutus" element={<AboutUs />} />
-          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/contactus" element={<ContactUs />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         
