@@ -20,6 +20,7 @@ import { useEffect } from "react";
 import AboutUs from "./pages/Aboutus";
 import ContactUs from "./pages/Contactus";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 // Wrapper component to conditionally show header/footer
 const Layout = ({ children }) => {
@@ -62,6 +63,7 @@ function App() {
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contactus" element={<ContactUs />} />
+          <Route path="/termsofservices" element={<TermsOfService />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         

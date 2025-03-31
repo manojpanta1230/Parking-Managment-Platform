@@ -1,5 +1,8 @@
 import { FaParking, FaGithub, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import AboutUs from "../../pages/Aboutus";
+import ContactUs from "../../pages/Contactus";
+import PrivacyPolicy from "../../pages/PrivacyPolicy";
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white">
@@ -22,23 +25,23 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link to="/aboutus" className="text-gray-300 hover:text-white">
-                  About Us
+                <AboutUs/>
                 </Link>
               </li>
               <li>
                 <Link to="/contactus" className="text-gray-300 hover:text-white">
-                  Contact
+                <ContactUs/>
                 </Link>
               </li>
               <li>
                 <Link to="/privacypolicy" className="text-gray-300 hover:text-white">
-                  Privacy Policy
+              <PrivacyPolicy/>
                 </Link>
               </li>
               <li>
-                <a href="/terms" className="text-gray-300 hover:text-white">
-                  Terms of Service
-                </a>
+                <Link to="/termsofservices" className="text-gray-300 hover:text-white">
+                  <TermsOfService/>
+                </Link>
               </li>
             </ul>
           </div>
