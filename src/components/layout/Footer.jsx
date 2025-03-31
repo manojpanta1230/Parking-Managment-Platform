@@ -1,5 +1,5 @@
 import { FaParking, FaGithub, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
-
+import { Link } from "react-router-dom";
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white">
@@ -21,19 +21,19 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/aboutus" className="text-gray-300 hover:text-white">
+                <Link to="/aboutus" className="text-gray-300 hover:text-white">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/contactus" className="text-gray-300 hover:text-white">
+                <Link to="/contactus" className="text-gray-300 hover:text-white">
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/privacypolicy" className="text-gray-300 hover:text-white">
+                <Link to="/privacypolicy" className="text-gray-300 hover:text-white">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="/terms" className="text-gray-300 hover:text-white">
