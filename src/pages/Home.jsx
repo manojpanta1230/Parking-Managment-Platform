@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { FaParking, FaClock, FaMobile, FaChartLine } from "react-icons/fa";
+import UserProfile from "./UserProfile";
+import Invoice from "./Invoice";
 
 const Home = () => {
   const features = [
@@ -129,6 +131,8 @@ const Home = () => {
           </div>
         </div>
       </div>
+      <UserProfile/>
+<Invoice/>
     </div>
   );
 };

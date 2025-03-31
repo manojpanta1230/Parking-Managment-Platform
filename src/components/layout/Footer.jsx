@@ -1,9 +1,5 @@
 import { FaParking, FaGithub, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import AboutUs from "../../pages/Aboutus";
-import ContactUs from "../../pages/Contactus";
-import PrivacyPolicy from "../../pages/PrivacyPolicy";
-import TermsOfService from "../../pages/TermsOfService";
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white">
@@ -41,7 +37,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/termsofservices" className="text-gray-300 hover:text-white">
-             TermsOfServices
+             Terms Of Services
                 </Link>
               </li>
             </ul>
