@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import AboutUs from "../../pages/Aboutus";
 import ContactUs from "../../pages/Contactus";
 import PrivacyPolicy from "../../pages/PrivacyPolicy";
+import TermsOfService from "../../pages/TermsOfService";
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white">
