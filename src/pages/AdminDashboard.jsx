@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import AdminSidebar from "../components/layout/AdminSidebar";
 import AdminHeader from "../components/layout/AdminHeader";
 import SlotManager from "../components/layout/SlotManager";
+import RevenueSummary from "../components/layout/RevenueSummary";
+import PlateTable from "../components/PlateTable";
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -15,12 +17,13 @@ function AdminDashboard() {
 
         <main className="p-6 overflow-y-auto">
           {activeTab === "dashboard" && (
+            <>
             <h2 className="text-2xl font-bold mb-4">Welcome to Admin Panel</h2>
+            <RevenueSummary/>
+            </>
           )}
           {activeTab === "slots" && <SlotManager />}
-          {activeTab === "users" && (
-            <p className="text-lg">User Management Coming Soon...</p>
-          )}
+          {activeTab === "users" && <PlateTable/>}
         </main>
       </div>
     </div>

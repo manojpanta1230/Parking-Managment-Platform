@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaCar } from "react-icons/fa";
 
 const SlotManager = () => {
-  const [slots, setSlots] = useState(Array(4).fill({ isOccupied: false }));
+  const [slots, setSlots] = useState(Array(2).fill({ isOccupied: false }));
 
   const toggleSlot = (index) => {
     const updated = [...slots];

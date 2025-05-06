@@ -17,7 +17,7 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
       <h2 className="text-2xl font-bold p-6 border-b">Admin</h2>
       {navItem("Dashboard", "dashboard")}
       {navItem("Manage Parking Slots", "slots")}
-      {navItem("Manage Users", "users")}
+      {navItem("Vechile Details ", "users")}
       
     </div>
   );
