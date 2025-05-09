@@ -1,21 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Invoice from "../pages/Invoice";
+import Invoice from "../../pages/Invoice";
+
 const PlateTable = () => {
   const [plates, setPlates] = useState([]);
   const [selectedPlate, setSelectedPlate] = useState(null);
 
-  useEffect(() => {
-    const fetchPlates = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/plates");
-        setPlates(res.data);
-      } catch (error) {
-        console.error("Failed to fetch plates:", error);
-      }
-    };
+  // Fetch function
+  const fetchPlates = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/plates");
+      setPlates(res.data);
+    } catch (error) {
+      console.error("Failed to fetch plates:", error);
+    }
+  };
 
-    fetchPlates();
+  useEffect(() => {
+    fetchPlates(); // Initial fetch
+
+    const interval = setInterval(() => {
+      fetchPlates(); // Refresh every 5 seconds
+    }, 5000);
+
+    return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
   return (
@@ -50,7 +58,9 @@ const PlateTable = () => {
                 <td className="px-4 py-2 text-gray-600">
                   {exit ? exit.toLocaleString() : "-"}
                 </td>
-                <td className="px-4 py-2">{duration !== null ? `${duration} min` : "-"}</td>
+                <td className="px-4 py-2">
+                  {duration !== null ? `${duration} min` : "-"}
+                </td>
                 <td className="px-4 py-2 text-green-700 font-semibold">
                   {item.price != null ? `$${item.price}` : "-"}
                 </td>
@@ -70,7 +80,6 @@ const PlateTable = () => {
         </tbody>
       </table>
 
-      {/* Render Invoice if a row is selected */}
       {selectedPlate && (
         <Invoice data={selectedPlate} onClose={() => setSelectedPlate(null)} />
       )}

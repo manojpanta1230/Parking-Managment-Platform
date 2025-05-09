@@ -3,12 +3,14 @@ import AdminSidebar from "../components/layout/AdminSidebar";
 import AdminHeader from "../components/layout/AdminHeader";
 import SlotManager from "../components/layout/SlotManager";
 import RevenueSummary from "../components/layout/RevenueSummary";
-import PlateTable from "../components/PlateTable";
+import PlateTable from "../components/layout/PlateTable";
+
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   return (
+
     <div className="flex h-screen bg-gray-100">
       <AdminSidebar setActiveTab={setActiveTab} activeTab={activeTab} />
 
@@ -27,6 +29,7 @@ function AdminDashboard() {
         </main>
       </div>
     </div>
+
   );
 }
 

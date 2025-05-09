@@ -1,26 +1,48 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaCar } from "react-icons/fa";
+import axios from "axios";
 
 const SlotManager = () => {
-  const [slots, setSlots] = useState(Array(2).fill({ isOccupied: false }));
+  const [slots, setSlots] = useState([]);
 
-  const toggleSlot = (index) => {
-    const updated = [...slots];
-    updated[index] = { isOccupied: !updated[index].isOccupied };
-    setSlots(updated);
+  const totalSlots = 2;
+
+  const fetchParkingStatus = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/plates");
+      const activePlates = res.data.filter(
+        (plate) => plate.entryTime && !plate.exitTime
+      );
+
+      // Build slots array where true = occupied
+      const updatedSlots = Array(totalSlots)
+        .fill({ isOccupied: false })
+        .map((slot, i) => ({
+          isOccupied: !!activePlates[i], // occupy slots in order of arrival
+        }));
+
+      setSlots(updatedSlots);
+    } catch (error) {
+      console.error("Failed to fetch slot status:", error);
+    }
   };
+
+  useEffect(() => {
+    fetchParkingStatus();
+    const interval = setInterval(fetchParkingStatus, 5000); // poll every 5s
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Manage Parking Slots</h2>
+      <h2 className="text-xl font-semibold mb-4">Parking Slot Status</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {slots.map((slot, i) => (
           <div key={i} className="p-4 bg-white shadow rounded-lg text-center">
-            <button
-              onClick={() => toggleSlot(i)}
+            <div
               className={`w-full h-20 flex items-center justify-center rounded transition-colors duration-200 ${
                 slot.isOccupied
-                  ? "bg-red-200 cursor-not-allowed"
+                  ? "bg-red-200"
                   : "bg-green-200 hover:bg-green-300"
               }`}
             >
@@ -29,7 +51,7 @@ const SlotManager = () => {
                   slot.isOccupied ? "text-red-600" : "text-green-600"
                 }`}
               />
-            </button>
+            </div>
             <div className="mt-2 text-sm text-gray-700">Slot {i + 1}</div>
             <div className="text-xs text-gray-500">
               {slot.isOccupied ? "Occupied" : "Available"}

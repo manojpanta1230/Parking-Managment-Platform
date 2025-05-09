@@ -72,33 +72,26 @@ const register = async (req, res) => {
 
 // ✅ LOGIN controller
 const login = async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-
-    if (!user) return res.status(401).json({ message: "Invalid email or password" });
-
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
-
-    if (!user.isVerified) {
-      return res.status(403).json({ message: "Please verify your email before logging in." });
+    // Validate user credentials (email & password)
+    const user = await User.findOne({ email: req.body.email });
+  
+    if (!user || !(await user.matchPassword(req.body.password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
-
-    res.json({
-      token: generateToken(user._id),
+  
+    // ✅ Send back user info and token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+  
+    res.status(200).json({
+      token,
       user: {
-        id: user._id,
-        email: user.email,
+        name: user.firstName,
         role: user.role,
       },
     });
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+  };
 
 // ✅ VERIFY OTP controller
 const verifyOTP = async (req, res) => {
@@ -158,4 +151,5 @@ module.exports = {
   register,
   login,
   verifyOTP,
+ 
 };

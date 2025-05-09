@@ -82,9 +82,36 @@ const isAnyPlateDetected = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+const releasePlateByNumber = async (req, res) => {
+  try {
+    const { plate } = req.params;
+
+    const activeEntry = await Plate.findOne({
+      plate,
+      entryTime: { $exists: true },
+      exitTime: { $exists: false },
+    }).sort({ createdAt: -1 });
+
+    if (!activeEntry) {
+      return res.status(404).json({ message: "No active entry found" });
+    }
+
+    const now = new Date();
+    const durationMinutes = Math.ceil((now - new Date(activeEntry.entryTime)) / 60000);
+
+    activeEntry.exitTime = now;
+    activeEntry.price = durationMinutes * 1; // $1 per min
+    await activeEntry.save();
+
+    res.json({ message: "Plate released", data: activeEntry });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 module.exports = {
   savePlate,
   getLatestPlate,
   isAnyPlateDetected,
   getAllPlates,
+  releasePlateByNumber,
 };

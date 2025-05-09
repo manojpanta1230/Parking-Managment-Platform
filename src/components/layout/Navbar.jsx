@@ -1,3 +1,4 @@
+// Navbar.jsx
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
@@ -7,29 +8,10 @@ const Navbar = () => {
   const [userName, setUserName] = useState(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      try {
-        const res = await fetch("http://localhost:5000/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          setUserName(data.name);
-        } else {
-          console.warn(data.message);
-        }
-      } catch (error) {
-        console.error("Profile fetch failed:", error.message);
-      }
-    };
-
-    fetchUser();
+    const storedName = localStorage.getItem("name");
+    if (storedName) {
+      setUserName(storedName)
+    }
   }, []);
 
   const handleLogout = () => {
@@ -54,7 +36,9 @@ const Navbar = () => {
             {userName ? (
               <div className="flex items-center gap-4">
                 <FaUserCircle className="text-2xl text-indigo-600" />
-                <span className="text-sm text-gray-600 font-medium">{userName}</span>
+                <span className="text-sm text-gray-600 font-medium">
+                  Welcome, {userName || "User"}
+                </span>
                 <button
                   onClick={handleLogout}
                   className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
@@ -63,16 +47,13 @@ const Navbar = () => {
                 </button>
               </div>
             ) : (
-              <div className="flex space-x-4">
-                <Link
-                  to="/login"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50"
-                >
+              <div className="flex space-x-4 items-center">
+                <Link to="/login" className="text-indigo-600 hover:underline">
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  className="text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded"
                 >
                   Register
                 </Link>

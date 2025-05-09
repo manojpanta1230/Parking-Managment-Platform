@@ -15,17 +15,21 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ParkingLots from "./pages/ParkingLots";
 import AdminDashboard from "./pages/AdminDashboard";
-
-import { useEffect } from "react";
 import AboutUs from "./pages/Aboutus";
 import ContactUs from "./pages/Contactus";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 
-// Wrapper component to conditionally show header/footer
+// ✅ ProtectedRoute component inside same file
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem("token"); // Adjust if using context
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+// ✅ Layout wrapper to conditionally show header/footer
 const Layout = ({ children }) => {
   const location = useLocation();
-  const hideLayoutOnRoutes = ["/dashboard"]; // add more paths if needed
+  const hideLayoutOnRoutes = ["/dashboard", "/login", "/register"];
 
   const hideLayout = hideLayoutOnRoutes.includes(location.pathname);
 
@@ -43,7 +47,6 @@ const Layout = ({ children }) => {
           error: { style: { background: "#DC2626" } },
         }}
       />
-
       {!hideLayout && <Navbar />}
       <main className="flex-grow">{children}</main>
       {!hideLayout && <Footer />}
@@ -60,13 +63,19 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/parking-lots" element={<ParkingLots />} />
-          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/termsofservices" element={<TermsOfService />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="*" element={<Navigate to="/" replace />} />
-        
         </Routes>
       </Layout>
     </Router>

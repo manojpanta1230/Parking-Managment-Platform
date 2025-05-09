@@ -131,8 +131,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <UserProfile/>
-<Invoice/>
+
     </div>
   );
 };

@@ -4,27 +4,35 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 
 const ParkingLots = () => {
-  const [slots, setSlots] = useState([
-    { isOccupied: false }, // Slot 1
-    { isOccupied: false }, // Slot 2
-  ]);
+  const [slots, setSlots] = useState([]);
+  const totalSlots = 2;
+
+  const fetchOccupiedSlots = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/plates");
+      const activePlates = res.data.filter(
+        (plate) => plate.entryTime && !plate.exitTime
+      );
+
+      // Create a slot array based on number of active vehicles
+      const updatedSlots = Array(totalSlots)
+        .fill({ isOccupied: false })
+        .map((_, i) => ({
+          isOccupied: !!activePlates[i],
+        }));
+
+      setSlots(updatedSlots);
+    } catch (err) {
+      toast.error("Error checking slot status");
+      console.error("Axios error:", err);
+    }
+  };
 
   useEffect(() => {
-    const checkPlate = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/plates/occupied");
-        if (res.data.occupied) {
-          const updatedSlots = [...slots];
-          updatedSlots[0].isOccupied = true;
-          setSlots(updatedSlots);
-        }
-      } catch (err) {
-        toast.error("Error checking slot status");
-        console.error("Axios error:", err);
-      }
-    };
+    fetchOccupiedSlots(); // Initial fetch
 
-    checkPlate();
+    const interval = setInterval(fetchOccupiedSlots, 5000); // Real-time update every 5s
+    return () => clearInterval(interval); // Cleanup
   }, []);
 
   return (

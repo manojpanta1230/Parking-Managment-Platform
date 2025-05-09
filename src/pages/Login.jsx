@@ -13,7 +13,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch("http://localhost:5000/api/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -22,18 +22,11 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success("Login successful");
         localStorage.setItem("token", data.token);
+        localStorage.setItem("name", data.user.name); // ✅ Make sure this line is here
         localStorage.setItem("role", data.user.role);
-        localStorage.setItem("name", data.user.name); // ✅ store name
-
-        if (data.user.role === "admin") {
-          navigate("/dashboard");
-        } else if (data.user.role === "customer") {
-          navigate("/");
-        } else {
-          toast.error("Unknown user role.");
-        }
+      
+        navigate(data.user.role === "admin" ? "/dashboard" : "/");
       } else {
         toast.error(data.message || "Login failed");
       }
