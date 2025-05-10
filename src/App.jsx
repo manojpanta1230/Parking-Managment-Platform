@@ -9,7 +9,6 @@ import { Toaster } from "react-hot-toast";
 
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -19,7 +18,9 @@ import AboutUs from "./pages/Aboutus";
 import ContactUs from "./pages/Contactus";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
-
+import UserDetails from "./components/layout/userDetails";
+import SlotManager from "./components/layout/SlotManager";
+import PlateTable from "./components/layout/PlateTable";
 // ✅ ProtectedRoute component inside same file
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem("token"); // Adjust if using context
@@ -63,6 +64,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/parking-lots" element={<ParkingLots />} />
+     
+          {/* Protected Routes */}
+            {/* ✅ Protected Admin Dashboard Group */}
           <Route
             path="/dashboard"
             element={
@@ -70,7 +74,14 @@ function App() {
                 <AdminDashboard />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="slots" element={<SlotManager />} />
+            <Route path="users_details" element={<UserDetails />} />
+            <Route path="vehicles" element={<PlateTable />} />
+          </Route>
+        
+
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/termsofservices" element={<TermsOfService />} />

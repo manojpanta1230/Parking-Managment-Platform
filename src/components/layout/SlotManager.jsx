@@ -4,22 +4,17 @@ import axios from "axios";
 
 const SlotManager = () => {
   const [slots, setSlots] = useState([]);
-
   const totalSlots = 2;
 
   const fetchParkingStatus = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/plates");
-      const activePlates = res.data.filter(
-        (plate) => plate.entryTime && !plate.exitTime
-      );
+      const res = await axios.get("http://localhost:5000/api/plates/getallplates");
+      const activePlates = res.data.filter((plate) => !plate.exitTime);
 
-      // Build slots array where true = occupied
-      const updatedSlots = Array(totalSlots)
-        .fill({ isOccupied: false })
-        .map((slot, i) => ({
-          isOccupied: !!activePlates[i], // occupy slots in order of arrival
-        }));
+      // Match booking logic: set slot based on stored slot number
+      const updatedSlots = Array(totalSlots).fill({ isOccupied: false }).map((_, i) => ({
+        isOccupied: !!activePlates.find(p => p.slot === i),
+      }));
 
       setSlots(updatedSlots);
     } catch (error) {
@@ -29,21 +24,19 @@ const SlotManager = () => {
 
   useEffect(() => {
     fetchParkingStatus();
-    const interval = setInterval(fetchParkingStatus, 5000); // poll every 5s
+    const interval = setInterval(fetchParkingStatus, 5000); // auto-refresh every 5s
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div>
+    <div className="p-6">
       <h2 className="text-xl font-semibold mb-4">Parking Slot Status</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {slots.map((slot, i) => (
           <div key={i} className="p-4 bg-white shadow rounded-lg text-center">
             <div
               className={`w-full h-20 flex items-center justify-center rounded transition-colors duration-200 ${
-                slot.isOccupied
-                  ? "bg-red-200"
-                  : "bg-green-200 hover:bg-green-300"
+                slot.isOccupied ? "bg-red-200" : "bg-green-200 hover:bg-green-300"
               }`}
             >
               <FaCar

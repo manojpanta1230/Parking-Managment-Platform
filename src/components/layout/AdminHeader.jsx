@@ -5,11 +5,14 @@ import { toast } from "react-hot-toast";
 const AdminHeader = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Optionally clear any user-related state here
-    toast.success("Logged out successfully!");
-    navigate("/login");
-  };
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  sessionStorage.clear();
+  toast.success("Logged out successfully!");
+  navigate("/login");
+};
+
 
   return (
     <div className="bg-white shadow px-6 py-4 flex justify-between items-center">

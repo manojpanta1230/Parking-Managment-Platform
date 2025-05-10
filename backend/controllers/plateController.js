@@ -108,10 +108,35 @@ const releasePlateByNumber = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const bookSlot = async (req, res) => {
+  const { name, vehicleNumber, slot } = req.body;
+
+  try {
+    // Check if the slot is already booked and not released
+    const existing = await Plate.findOne({ slot, exitTime: null });
+    if (existing) {
+      return res.status(400).json({ message: "Slot already booked" });
+    }
+
+    const newBooking = new Plate({
+      name,
+      vehicleNumber,
+      slot,
+      booked: true,
+    });
+
+    await newBooking.save();
+    res.status(200).json({ message: "Slot booked successfully!" });
+  } catch (err) {
+    console.error("Booking error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   savePlate,
   getLatestPlate,
   isAnyPlateDetected,
   getAllPlates,
   releasePlateByNumber,
+  bookSlot,
 };

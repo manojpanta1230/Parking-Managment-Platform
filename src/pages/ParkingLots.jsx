@@ -2,24 +2,46 @@ import React, { useState, useEffect } from "react";
 import { FaCar } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
 
 const ParkingLots = () => {
   const [slots, setSlots] = useState([]);
   const totalSlots = 2;
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [vehicleNumber, setVehicleNumber] = useState("");
+
+  // Fetch from localStorage (assumes user object is stored after login)
+// ✅ SAFELY extract the logged-in user
+const [userName, setUserName] = useState("");
+const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+useEffect(() => {
+  try {
+    const stored = JSON.parse(localStorage.getItem("user"));
+    if (stored?.name) {
+      setUserName(stored.name);
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false); 
+    }
+  } catch {
+    setIsLoggedIn(false);
+  }
+}, []);
+
+
 
   const fetchOccupiedSlots = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/plates");
-      const activePlates = res.data.filter(
-        (plate) => plate.entryTime && !plate.exitTime
-      );
+      const res = await axios.get("http://localhost:5000/api/plates/getallplates");
+      const activePlates = res.data.filter(p => !p.exitTime);
 
-      // Create a slot array based on number of active vehicles
-      const updatedSlots = Array(totalSlots)
-        .fill({ isOccupied: false })
-        .map((_, i) => ({
-          isOccupied: !!activePlates[i],
-        }));
+      const updatedSlots = Array(totalSlots).fill({ isOccupied: false }).map((_, i) => ({
+        isOccupied: !!activePlates.find(p => p.slot === i),
+      }));
 
       setSlots(updatedSlots);
     } catch (err) {
@@ -29,11 +51,47 @@ const ParkingLots = () => {
   };
 
   useEffect(() => {
-    fetchOccupiedSlots(); // Initial fetch
+    fetchOccupiedSlots();
+    const interval = setInterval(fetchOccupiedSlots, 5000);
+    return () => clearInterval(interval);
+    }, []);
 
-    const interval = setInterval(fetchOccupiedSlots, 5000); // Real-time update every 5s
-    return () => clearInterval(interval); // Cleanup
-  }, []);
+  const openModal = (slotIndex) => {
+    if (!isLoggedIn) {
+      toast.error("Please log in to book a slot");
+      return;
+    }
+    setSelectedSlot(slotIndex);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedSlot(null);
+    setVehicleNumber("");
+    setModalIsOpen(false);
+  };
+
+  const handleBooking = async () => {
+    if (!vehicleNumber.trim()) {
+      toast.error("Please enter a vehicle number");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:5000/api/plates/book", {
+        name: userName,
+        vehicleNumber,
+        slot: selectedSlot,
+      });
+
+      toast.success("Slot booked successfully");
+      closeModal();
+      fetchOccupiedSlots();
+    } catch (err) {
+      toast.error("Failed to book slot");
+      console.error(err);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center bg-gray-100 p-8">
@@ -43,10 +101,11 @@ const ParkingLots = () => {
         {slots.map((slot, index) => (
           <div key={index} className="relative">
             <button
+              onClick={() => !slot.isOccupied && openModal(index)}
               className={`w-40 h-40 rounded-xl flex items-center justify-center transition-all ${
-                slot.isOccupied ? "bg-red-200" : "bg-green-200"
+                slot.isOccupied ? "bg-red-200" : "bg-green-200 hover:bg-green-300"
               }`}
-              disabled
+              disabled={slot.isOccupied}
             >
               <FaCar
                 className={`h-12 w-12 ${
@@ -58,6 +117,28 @@ const ParkingLots = () => {
           </div>
         ))}
       </div>
+
+      {/* Modal for booking */}
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        className="bg-white rounded p-6 max-w-md mx-auto mt-20 shadow"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-40"
+      >
+        <h2 className="text-xl font-semibold mb-4">Book Slot {selectedSlot + 1}</h2>
+        <p className="mb-2">Name: <strong>{userName}</strong></p>
+        <input
+          type="text"
+          value={vehicleNumber}
+          onChange={(e) => setVehicleNumber(e.target.value)}
+          placeholder="Enter vehicle number"
+          className="w-full p-2 border rounded mb-4"
+        />
+        <div className="flex justify-end gap-2">
+          <button onClick={closeModal} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+          <button onClick={handleBooking} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Confirm</button>
+        </div>
+      </Modal>
     </div>
   );
 };

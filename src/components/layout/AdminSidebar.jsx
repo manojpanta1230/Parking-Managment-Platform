@@ -18,6 +18,7 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
       {navItem("Dashboard", "dashboard")}
       {navItem("Manage Parking Slots", "slots")}
       {navItem("Vechile Details ", "users")}
+      {navItem("User Details ", "users_details")}
       
     </div>
   );

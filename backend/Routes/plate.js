@@ -4,15 +4,16 @@ const router = express.Router();
 const {
   savePlate,
   getLatestPlate,
-  isAnyPlateDetected,
+  bookSlot,
   getAllPlates,
   releasePlateByNumber, // <-- new controller
 } = require("../controllers/plateController");
 
 router.post("/", savePlate);                 // POST from ESP32-CAM
 router.get("/latest", getLatestPlate);       // GET latest plate
-
-router.get("/", getAllPlates);               // GET all plates
+router.get("/getallplates", getAllPlates);               // GET all plates
+router.post("/book", bookSlot);             // POST to book a slot
+router.post("/release/:plate", releasePlateByNumber);
 
 // ✅ New: Admin route to manually mark a plate as exited
 router.post("/release/:plate", releasePlateByNumber);

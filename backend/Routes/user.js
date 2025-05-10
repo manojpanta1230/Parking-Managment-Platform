@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/User"); // Correct import for User model
+const { getAllUsers } = require("../Controllers/userControllers");
 
 const {
   register,
@@ -9,9 +9,13 @@ const {
 
 const { authenticateToken } = require("../Authentication/auth");
 
-
-
+// ✅ Public routes
 router.post("/register", register);
-router.post("/login", login, authenticateToken);
+router.post("/login", login);
+
+
+
+router.get("/allusers",getAllUsers);
+
 
 module.exports = router;

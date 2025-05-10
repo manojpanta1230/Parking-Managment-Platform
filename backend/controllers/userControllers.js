@@ -70,7 +70,7 @@ const register = async (req, res) => {
   }
 };
 
-// ✅ LOGIN controller
+//  LOGIN controller
 const login = async (req, res) => {
     // Validate user credentials (email & password)
     const user = await User.findOne({ email: req.body.email });
@@ -93,7 +93,7 @@ const login = async (req, res) => {
     });
   };
 
-// ✅ VERIFY OTP controller
+// VERIFY OTP controller
 const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
 
@@ -120,7 +120,7 @@ const verifyOTP = async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
-        name: `${user.firstName} ${user.lastName}`, // ✅ include this
+        name: `${user.firstName} ${user.lastName}`, //  include this
       },
     });
     
@@ -129,27 +129,30 @@ const verifyOTP = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-exports.getProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("firstName lastName email role");
-    if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.status(200).json({
-      name: `${user.firstName} ${user.lastName}`,
-      email: user.email,
-      role: user.role,
-    });
-  } catch (error) {
-    console.error("Get profile error:", error.message);
-    res.status(500).json({ message: "Server error" });
+// GET ALL USERS controller
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, "firstName lastName email role"); // Select only needed fields
+    const formatted = users.map(u => ({
+      _id: u._id,
+      name: `${u.firstName} ${u.lastName}`,
+      email: u.email,
+      role: u.role
+    }));
+    res.status(200).json(formatted);
+  } catch (err) {
+    console.error("GET USERS ERROR:", err.message);
+    res.status(500).json({ message: "Failed to fetch users" });
   }
 };
 
 
-// ✅ Export all controllers
+//  Export all controllers
 module.exports = {
   register,
   login,
   verifyOTP,
+  getAllUsers,
  
 };
