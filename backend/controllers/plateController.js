@@ -132,6 +132,28 @@ const bookSlot = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// Controller for unbooking a slot
+const unbookSlot = async (req, res) => {
+  try {
+    const { name, slot } = req.body;
+    const existingBooking = await Plate.findOne({ name, slot, exitTime: null });
+
+    if (!existingBooking) {
+      return res.status(400).json({ message: "No booking found for this slot." });
+    }
+
+    existingBooking.exitTime = new Date(); // Mark the exit time
+    await existingBooking.save();
+
+    res.status(200).json({ message: "Booking canceled successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to cancel booking" });
+  }
+};
+
+
+
 module.exports = {
   savePlate,
   getLatestPlate,
@@ -139,4 +161,5 @@ module.exports = {
   getAllPlates,
   releasePlateByNumber,
   bookSlot,
+  unbookSlot,
 };

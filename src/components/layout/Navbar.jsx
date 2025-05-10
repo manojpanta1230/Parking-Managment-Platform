@@ -7,17 +7,19 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState(null);
 
+  // Fetch user info from localStorage
   useEffect(() => {
-    const storedName = localStorage.getItem("name");
-    if (storedName) {
-      setUserName(storedName)
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUserName(parsedUser.name); // Access the name from the stored user object
     }
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
-    setUserName(null);
-    navigate("/login");
+    localStorage.clear(); // Clear localStorage on logout
+    setUserName(null); // Reset user name state
+    navigate("/login"); // Redirect to login page
   };
 
   return (
@@ -37,7 +39,7 @@ const Navbar = () => {
               <div className="flex items-center gap-4">
                 <FaUserCircle className="text-2xl text-indigo-600" />
                 <span className="text-sm text-gray-600 font-medium">
-                  Welcome, {userName || "User"}
+                  Welcome, {userName}
                 </span>
                 <button
                   onClick={handleLogout}

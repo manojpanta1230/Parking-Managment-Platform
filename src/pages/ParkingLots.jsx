@@ -3,45 +3,54 @@ import { FaCar } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import Modal from "react-modal";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 
 Modal.setAppElement("#root");
 
 const ParkingLots = () => {
+  const navigate = useNavigate(); // Initialize navigate function for redirection
   const [slots, setSlots] = useState([]);
   const totalSlots = 2;
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [vehicleNumber, setVehicleNumber] = useState("");
 
-  // Fetch from localStorage (assumes user object is stored after login)
-// ✅ SAFELY extract the logged-in user
-const [userName, setUserName] = useState("");
-const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Initialize state for the user and login status
+  const [userName, setUserName] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-useEffect(() => {
-  try {
-    const stored = JSON.parse(localStorage.getItem("user"));
+  // Check localStorage for user data on component mount
+  useEffect(() => {
+    let stored = null;
+    try {
+      const raw = localStorage.getItem("user");
+      console.log(raw);
+      stored = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.error("Invalid user data in localStorage");
+      stored = null;
+    }
+
     if (stored?.name) {
       setUserName(stored.name);
-      setIsLoggedIn(true);
+      setIsLoggedIn(true);  // If user is found in localStorage, set isLoggedIn to true
     } else {
-      setIsLoggedIn(false); 
+      setUserName("");
+      setIsLoggedIn(false); // If no user found, set isLoggedIn to false
     }
-  } catch {
-    setIsLoggedIn(false);
-  }
-}, []);
+  }, []);
 
-
-
+  // Fetch parking slots from backend
   const fetchOccupiedSlots = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/plates/getallplates");
       const activePlates = res.data.filter(p => !p.exitTime);
 
-      const updatedSlots = Array(totalSlots).fill({ isOccupied: false }).map((_, i) => ({
-        isOccupied: !!activePlates.find(p => p.slot === i),
-      }));
+      const updatedSlots = Array(totalSlots)
+        .fill({ isOccupied: false })
+        .map((_, i) => ({
+          isOccupied: !!activePlates.find(p => p.slot === i),
+        }));
 
       setSlots(updatedSlots);
     } catch (err) {
@@ -54,11 +63,13 @@ useEffect(() => {
     fetchOccupiedSlots();
     const interval = setInterval(fetchOccupiedSlots, 5000);
     return () => clearInterval(interval);
-    }, []);
+  }, []);
 
+  // Open modal to book slot
   const openModal = (slotIndex) => {
     if (!isLoggedIn) {
       toast.error("Please log in to book a slot");
+      navigate("/login"); // Redirect to login page if not logged in
       return;
     }
     setSelectedSlot(slotIndex);
@@ -101,7 +112,7 @@ useEffect(() => {
         {slots.map((slot, index) => (
           <div key={index} className="relative">
             <button
-              onClick={() => !slot.isOccupied && openModal(index)}
+              onClick={() => openModal(index)} // Open modal on click
               className={`w-40 h-40 rounded-xl flex items-center justify-center transition-all ${
                 slot.isOccupied ? "bg-red-200" : "bg-green-200 hover:bg-green-300"
               }`}

@@ -12,9 +12,6 @@ const { authenticateToken } = require("../Authentication/auth");
 // ✅ Public routes
 router.post("/register", register);
 router.post("/login", login);
-
-
-
 router.get("/allusers",getAllUsers);
 
 

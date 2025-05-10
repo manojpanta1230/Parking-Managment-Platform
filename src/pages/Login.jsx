@@ -10,31 +10,36 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:5000/api/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const response = await fetch("http://localhost:5000/api/user/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("name", data.user.name); // ✅ Make sure this line is here
-        localStorage.setItem("role", data.user.role);
-      
-        navigate(data.user.role === "admin" ? "/dashboard" : "/");
-      } else {
-        toast.error(data.message || "Login failed");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Something went wrong.");
+    if (response.ok) {
+      // Store the entire user object
+      localStorage.setItem("user", JSON.stringify({
+        name: data.user.name,
+        role: data.user.role,
+      }));
+      localStorage.setItem("token", data.token);
+
+      console.log("Login successful:", data.user.name);
+      navigate(data.user.role === "admin" ? "/dashboard" : "/");
+    } else {
+      toast.error(data.message || "Login failed");
     }
-  };
+  } catch (error) {
+    console.error("Login error:", error);
+    toast.error("Something went wrong.");
+  }
+};
+
 
   return (
     <div className="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
