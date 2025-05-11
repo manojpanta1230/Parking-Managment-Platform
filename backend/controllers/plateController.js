@@ -108,52 +108,121 @@ const releasePlateByNumber = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+// Controller for booking a slot
+// Controller to create or update the booking for a plate based on plate number
 const bookSlot = async (req, res) => {
   const { name, vehicleNumber, slot } = req.body;
 
   try {
-    // Check if the slot is already booked and not released
-    const existing = await Plate.findOne({ slot, exitTime: null });
-    if (existing) {
-      return res.status(400).json({ message: "Slot already booked" });
+    // Step 1: Check if the same vehicle (plate number) is already detected and booked
+    const existingBooking = await Plate.findOne({ plate: vehicleNumber, booked: true });
+
+    if (existingBooking) {
+      // If the plate is already booked, send a response that the booking already exists
+      return res.status(400).json({ message: `Vehicle with plate ${vehicleNumber} is already booked.` });
     }
 
+    // Step 2: Check if the slot is already booked
+    const existingSlotBooking = await Plate.findOne({ slot, booked: true });
+
+    if (existingSlotBooking) {
+      return res.status(400).json({ message: "This slot is already booked." });
+    }
+
+    // Step 3: Create a new booking for the selected slot
     const newBooking = new Plate({
       name,
       vehicleNumber,
       slot,
-      booked: true,
+      booked: true, // Mark the slot as booked
+      entryTime: new Date(), // Set the current time as entry time
     });
 
+    // Step 4: Save the new booking to the database
     await newBooking.save();
-    res.status(200).json({ message: "Slot booked successfully!" });
+
+    // Step 5: Respond with a success message and the booking details
+    res.status(200).json({ message: "Slot booked successfully!", booking: newBooking });
   } catch (err) {
-    console.error("Booking error:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error booking slot:", err);
+    res.status(500).json({ message: "Server error while booking the slot", error: err.message });
   }
 };
-// Controller for unbooking a slot
-const unbookSlot = async (req, res) => {
-  try {
-    const { name, slot } = req.body;
-    const existingBooking = await Plate.findOne({ name, slot, exitTime: null });
+// Controller to delete a booking (cancel the booking)
+const deleteBooking = async (req, res) => {
+  const { slotId } = req.params;  // Slot ID from URL parameters
+  const { name } = req.body;  // User name from request body
 
-    if (!existingBooking) {
-      return res.status(400).json({ message: "No booking found for this slot." });
+  try {
+    // Find and delete the booking by slot ID and user name
+    const deletedBooking = await Plate.findOneAndDelete({
+      _id: slotId,
+      name: name,  // Ensure it's the correct user cancelling the booking
+      booked: true,  // Ensure the booking exists and is active
+    });
+
+    if (!deletedBooking) {
+      return res.status(404).json({ message: "Booking not found or already canceled." });
     }
 
-    existingBooking.exitTime = new Date(); // Mark the exit time
-    await existingBooking.save();
-
-    res.status(200).json({ message: "Booking canceled successfully" });
+    res.status(200).json({ message: "Booking canceled and data removed successfully." });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to cancel booking" });
+    console.error("Error canceling booking:", err);
+    res.status(500).json({ message: "Server error while canceling booking." });
   }
 };
 
+// Controller for unbooking a slot
+// controllers/bookingController.js
+// Controller to cancel the booking
+const updateSlot = async (req, res) => {
+  const { _id } = req.params;  // The _id of the booking (plate booking) from the URL parameter
+  const { name } = req.body;   // The name of the user from the request body
 
+  try {
+    // Find the booking by _id and user name, and toggle the booked status
+    const booking = await Plate.findOne({ _id, name }); // Find the booking by slot ID and user name
 
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found." });
+    }
+
+    // Toggle the booked status
+    const updatedBooking = await Plate.findOneAndUpdate(
+      { _id, name },
+      { 
+        booked: !booking.booked,  // Toggle booked status
+        exitTime: booking.booked ? new Date() : null  // If canceling, set exitTime; if booking, leave it null
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ message: updatedBooking.booked ? "Booking confirmed" : "Booking canceled", booking: updatedBooking });
+  } catch (err) {
+    console.error("Error toggling booking:", err);
+    res.status(500).json({ message: "Server error while toggling booking." });
+  }
+};
+
+const updateSlotStatus = async (req, res) => {
+  const { slotId } = req.params; // Get slotId from request
+  const { booked } = req.body;  // Get the updated booked status
+
+  try {
+    const slot = await Plate.findById(slotId);
+
+    if (!slot) {
+      return res.status(404).json({ message: "Slot not found" });
+    }
+
+    slot.booked = booked;  // Update the booked status
+    await slot.save();  // Save the updated slot
+
+    res.status(200).json({ message: "Slot status updated successfully", slot });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating slot status", error: err.message });
+  }
+};
 module.exports = {
   savePlate,
   getLatestPlate,
@@ -161,5 +230,7 @@ module.exports = {
   getAllPlates,
   releasePlateByNumber,
   bookSlot,
-  unbookSlot,
+  updateSlot,
+  deleteBooking,
+  updateSlotStatus,
 };

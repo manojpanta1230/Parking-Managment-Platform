@@ -8,12 +8,14 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate for redire
 Modal.setAppElement("#root");
 
 const ParkingLots = () => {
-  const navigate = useNavigate(); // Initialize navigate function for redirection
+  const navigate = useNavigate();
   const [slots, setSlots] = useState([]);
   const totalSlots = 2;
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [vehicleNumber, setVehicleNumber] = useState("");
+  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // New state for confirmation modal
+  const [hoveredSlot, setHoveredSlot] = useState(null); // State to track hovered slot
 
   // Initialize state for the user and login status
   const [userName, setUserName] = useState("");
@@ -24,7 +26,6 @@ const ParkingLots = () => {
     let stored = null;
     try {
       const raw = localStorage.getItem("user");
-      console.log(raw);
       stored = raw ? JSON.parse(raw) : null;
     } catch (e) {
       console.error("Invalid user data in localStorage");
@@ -44,12 +45,13 @@ const ParkingLots = () => {
   const fetchOccupiedSlots = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/plates/getallplates");
-      const activePlates = res.data.filter(p => !p.exitTime);
+      const activePlates = res.data.filter(p => p.booked === true);  // Filter by booked status
 
       const updatedSlots = Array(totalSlots)
         .fill({ isOccupied: false })
         .map((_, i) => ({
           isOccupied: !!activePlates.find(p => p.slot === i),
+          _id: activePlates.find(p => p.slot === i)?._id,  // Add _id to each slot
         }));
 
       setSlots(updatedSlots);
@@ -72,8 +74,8 @@ const ParkingLots = () => {
       navigate("/login"); // Redirect to login page if not logged in
       return;
     }
-    setSelectedSlot(slotIndex);
     setModalIsOpen(true);
+    setSelectedSlot(slotIndex);
   };
 
   const closeModal = () => {
@@ -82,6 +84,7 @@ const ParkingLots = () => {
     setModalIsOpen(false);
   };
 
+  // Handle booking of a slot
   const handleBooking = async () => {
     if (!vehicleNumber.trim()) {
       toast.error("Please enter a vehicle number");
@@ -93,6 +96,7 @@ const ParkingLots = () => {
         name: userName,
         vehicleNumber,
         slot: selectedSlot,
+        booked: true,  // Add booked flag
       });
 
       toast.success("Slot booked successfully");
@@ -104,6 +108,49 @@ const ParkingLots = () => {
     }
   };
 
+  // Handle cancel booking for the selected slot
+const handleCancelBooking = async () => {
+  console.log("selectedSlot before cancellation:", selectedSlot);  // Log selectedSlot before making the request
+
+  if (selectedSlot === null) {
+    toast.error("No slot selected for cancellation");
+    return;
+  }
+
+  try {
+    const slotId = slots[selectedSlot]?._id;  // Get the _id of the selected slot booking
+
+    if (!slotId) {
+      toast.error("Slot ID not found");
+      console.error("Slot ID is missing or invalid.");
+      return;
+    }
+
+    // Send a DELETE request to remove the booking based on the slotId
+    await axios.delete(`http://localhost:5000/api/plates/delete/${slotId}`, {
+      data: { name: userName },  // Pass the user's name in the body to ensure the correct booking is canceled
+    });
+
+    toast.success("Booking canceled and data removed successfully");
+    fetchOccupiedSlots(); // Refresh the slots after canceling
+    setConfirmationModalIsOpen(false); // Close the confirmation modal after successful cancellation
+  } catch (err) {
+    toast.error("Failed to cancel booking");
+    console.error(err);
+  }
+};
+
+  // Show confirmation modal for unbooking
+  const openConfirmationModal = (slotIndex) => {
+    setSelectedSlot(slotIndex);  // Set the selected slot for confirmation
+    setConfirmationModalIsOpen(true);  // Open the confirmation modal
+  };
+
+  const closeConfirmationModal = () => {
+    setConfirmationModalIsOpen(false);  // Close the confirmation modal
+    setSelectedSlot(null);  // Reset selected slot
+  };
+
   return (
     <div className="flex flex-col items-center justify-center bg-gray-100 p-8">
       <Toaster />
@@ -112,7 +159,7 @@ const ParkingLots = () => {
         {slots.map((slot, index) => (
           <div key={index} className="relative">
             <button
-              onClick={() => openModal(index)} // Open modal on click
+              onClick={() => openModal(index)}  // Open modal on click
               className={`w-40 h-40 rounded-xl flex items-center justify-center transition-all ${
                 slot.isOccupied ? "bg-red-200" : "bg-green-200 hover:bg-green-300"
               }`}
@@ -125,6 +172,16 @@ const ParkingLots = () => {
               />
             </button>
             <p className="text-center mt-2 font-medium">Slot {index + 1}</p>
+
+            {/* Show cancel booking button for occupied slots */}
+            {slot.isOccupied && (
+              <div
+                className="absolute top-0 right-0 text-red-600 text-xl cursor-pointer"
+                onClick={() => openConfirmationModal(index)} // Open confirmation modal on click
+              >
+                × Cancel Booking
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -148,6 +205,21 @@ const ParkingLots = () => {
         <div className="flex justify-end gap-2">
           <button onClick={closeModal} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
           <button onClick={handleBooking} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Confirm</button>
+        </div>
+      </Modal>
+
+      {/* Confirmation Modal for Canceling Booking */}
+      <Modal
+        isOpen={confirmationModalIsOpen}
+        onRequestClose={closeConfirmationModal}
+        className="bg-white rounded p-6 max-w-md mx-auto mt-20 shadow"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-40"
+      >
+        <h2 className="text-xl font-semibold mb-4">Cancel Booking for Slot {selectedSlot + 1}</h2>
+        <p className="mb-2">Are you sure you want to cancel the booking for slot {selectedSlot + 1}?</p>
+        <div className="flex justify-end gap-2">
+          <button onClick={closeConfirmationModal} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+          <button onClick={handleCancelBooking} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Confirm</button>
         </div>
       </Modal>
     </div>

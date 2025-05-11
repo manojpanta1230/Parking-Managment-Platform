@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "5 min" });
 };
 
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();

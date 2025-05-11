@@ -5,6 +5,7 @@ import SlotManager from "../components/layout/SlotManager";
 import RevenueSummary from "../components/layout/RevenueSummary";
 import PlateTable from "../components/layout/PlateTable";
 import UserDetails from "../components/layout/userDetails";
+import BookingTable from "../components/layout/BookingTable";
 
 
 function AdminDashboard() {
@@ -28,6 +29,7 @@ function AdminDashboard() {
           {activeTab === "slots" && <SlotManager />}
           {activeTab === "users" && <PlateTable/>}
          {activeTab === "users_details" && <UserDetails/>}
+         {activeTab === "booking_details" && <BookingTable/>}
         </main>
       </div>
     </div>

@@ -6,7 +6,7 @@ const path = require("path");
 const app = express();
 const plateRoutes = require("./Routes/plate"); // ✅ Added plate routes
 const userRoutes = require("./Routes/user"); // ✅ Added user route
-
+// const bookingRoutes = require("./Routes/booking"); // Import booking routes
 // Middleware
 app.use(express.json());
 app.use(cors());
@@ -22,10 +22,9 @@ mongoose
 
 // Routes
 app.use("/api/user", userRoutes); // ✅ Added user route
- app.use("/api/plate", require("./Routes/plate")); // ✅ Added plate routes
 app.use("/api/plates", plateRoutes);
 app.use("/api/auth", require("./Routes/auth")); // ✅ Added auth route
-
+// app.use("/api/bookings", bookingRoutes); // Add booking routes
 
 const port = 5000;
 
