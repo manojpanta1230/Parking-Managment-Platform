@@ -15,7 +15,6 @@ const ParkingLots = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // New state for confirmation modal
-  const [hoveredSlot, setHoveredSlot] = useState(null); // State to track hovered slot
 
   // Initialize state for the user and login status
   const [userName, setUserName] = useState("");

@@ -19,7 +19,7 @@ router.post("/book", bookSlot);              // POST to book a slot
 router.post("/release/:plate", releasePlateByNumber);
  router.get("/getallplates", getAllPlates); // GET all plates
 
-// ✅ Updated Route for deleting a slot (Unbook)
+//  Updated Route for deleting a slot (Unbook)
 router.put("/update/:_id", updateSlot);   // Use DELETE method for canceling booking by slot ID
 //router.post("/unbook", unbookSlot);
 router.delete("/delete/:slotId", deleteBooking);

@@ -66,7 +66,7 @@ function App() {
           <Route path="/parking-lots" element={<ParkingLots />} />
      
           {/* Protected Routes */}
-            {/* ✅ Protected Admin Dashboard Group */}
+            {/*  Protected Admin Dashboard Group */}
           <Route
             path="/dashboard"
             element={

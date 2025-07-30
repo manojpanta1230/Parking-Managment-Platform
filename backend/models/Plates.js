@@ -18,6 +18,7 @@ const PlateSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  bookingTime: Date,   // 
 
   // 🕐 Timing
   entryTime: Date,         // when car entered
